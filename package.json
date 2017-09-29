@@ -1,0 +1,17 @@
+{
+  "name": "softap-setup-ts",
+  "description": "Perform wireless setup of Particle devices",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "echo \"created by spark & webdevelopland\""
+  },
+  "author": {
+    "name": "Web Developland",
+    "email": "webdevelopland@protonmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^8.0.31",
+    "node-rsa": "^0.4.2"
+  }
+}
