@@ -1,7 +1,7 @@
 {
-  "name": "softap-setup-ts",
+  "name": "softap-setup-ts-demo",
   "description": "Perform wireless setup of Particle devices",
-  "version": "0.0.1",
+  "version": "1.2.0",
   "scripts": {
     "test": "echo \"created by spark & webdevelopland\""
   },
@@ -11,7 +11,6 @@
   },
   "license": "LGPL-3.0",
   "dependencies": {
-    "@types/node": "^8.0.31",
     "node-rsa": "^0.4.2"
   }
 }
