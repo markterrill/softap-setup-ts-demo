@@ -34,18 +34,18 @@ var eapTypeTable = {
   tls: 13
 };
 
-function is(cb) {
-  if (cb && typeof cb == 'function') {
+function is(cb:Function) {
+  if (cb) {
     return true;
   }
   throw new Error('Invalid callback function provided.');
 }
 
-function formatPem(data) {
+function formatPem(data:string) {
   return data.trim() + '\r\n';
 }
 
-function checkResponse(err, dat, cb) {
+function checkResponse(err:any, dat:any, cb:Function) {
   if (err) {
     return cb(err);
   }
@@ -67,7 +67,7 @@ SoftAPOptions.defaultOptions = () => {
     channel: 6
   };
 };
-SoftAPOptions.assign = (opts, options) => {
+SoftAPOptions.assign = (opts:any, options:any) => {
   if (options && typeof options == 'object') {
     Object.keys(options).forEach((key) => {
       opts[key] = options[key];
@@ -86,7 +86,7 @@ export class SoftAP {
   warmedUp:boolean;
   protocol:string;
 
-  constructor(options) {
+  constructor(options:any) {
     this.keepAlive = options.keepAlive;
     this.noDelay = options.noDelay;
     this.timeout = options.timeout;
@@ -99,7 +99,7 @@ export class SoftAP {
     return this;
   }
 
-  _sendProtocolCommand(cmd, cb) {
+  _sendProtocolCommand(cmd:any, cb:Function) {
     if (this.protocol === 'tcp') {
       this._sendProtocolCommandTcp(cmd, cb);
     } else if (this.protocol === 'http') {
@@ -108,7 +108,7 @@ export class SoftAP {
       throw new Error('unknown protocol');
     }
   }
-  _sendProtocolCommandTcp(cmd, cb) {
+  _sendProtocolCommandTcp(cmd:any, cb:Function) {
     var that = this;
 
     function sendRealCommand() {
@@ -127,7 +127,7 @@ export class SoftAP {
       sendRealCommand();
     }
 
-    function sendCommand(cmd, cb, forceClose, timeoutOverride) {
+    function sendCommand(cmd:any, cb:Function, forceClose:boolean, timeoutOverride:Number) {
       var err, json;
       var data = '';
 
@@ -187,7 +187,7 @@ export class SoftAP {
     }
   }
 
-  _sendProtocolCommandHttp(cmd, cb) {
+  _sendProtocolCommandHttp(cmd:any, cb:Function) {
     var payload;
 
     if (!cmd || typeof cmd !== 'object') {
@@ -254,7 +254,7 @@ export class SoftAP {
     req.end();
   }
 
-  __sendCommand(cmd, cb) {
+  __sendCommand(cmd:any, cb:Function) {
     is(cb);
     if (typeof cmd == 'object') {
       if (!cmd.name) {
@@ -267,7 +267,7 @@ export class SoftAP {
     return this._sendProtocolCommand(cmd, cb);
   }
 
-  scan(cb) {
+  scan(cb:Function) {
     is(cb);
     this.__sendCommand({ name: 'scan-ap' }, function response(err, json) {
       if (err) {
@@ -277,19 +277,26 @@ export class SoftAP {
     });
   }
 
-  connect(index, cb?) {
+  connect(index:any, cb?:any) {
+    var cbFormated:Function;
+    var indexFormated:number;
     if (!cb) {
-      cb = index;
-      index = 0;
+      if (Object.prototype.toString.call( index ) === "[object Function]") {
+        cbFormated = index;
+      }
+      else {
+        cbFormated = () => {};
+      }
+      indexFormated = 0;
     }
     is(cb);
-    this.__sendCommand({ name: 'connect-ap', body: { idx: index } }, function response(err, dat) {
-      checkResponse(err, dat, cb);
-      cb();
+    this.__sendCommand({ name: 'connect-ap', body: { idx: indexFormated } }, function response(err, dat) {
+      checkResponse(err, dat, cbFormated);
+      cbFormated();
     });
   }
 
-  deviceInfo(cb) {
+  deviceInfo(cb:Function) {
     is(cb);
     this.__sendCommand({ name: 'device-id' }, function response(err, dat) {
       if (err) {
@@ -307,7 +314,7 @@ export class SoftAP {
     }.bind(this));
   }
 
-  publicKey(cb) {
+  publicKey(cb:Function) {
     is(cb);
     this.__sendCommand({ name: 'public-key' }, function response(err, dat) {
       checkResponse(err, dat, cb);
@@ -319,7 +326,7 @@ export class SoftAP {
     }.bind(this));
   }
 
-  set(data, cb) {
+  set(data:any, cb:Function) {
    is(cb);
    this.__sendCommand({ name: 'set', body: data }, function response(err, dat) {
      checkResponse(err, dat, cb);
@@ -327,9 +334,9 @@ export class SoftAP {
    });
   }
 
-  setClaimCode(code, cb) {
+  setClaimCode(code:string, cb:Function) {
     is(cb);
-    if (!code || typeof code !== 'string') {
+    if (!code) {
       throw new Error('Must provide claim code string as first parameter');
     }
     var claim = {
@@ -339,7 +346,7 @@ export class SoftAP {
     this.set(claim, cb);
   }
 
-  aesEncrypt(data, kiv?) {
+  aesEncrypt(data:any, kiv?:any) {
     if (!kiv) {
       kiv = crypto.randomBytes(32);
     }
@@ -354,7 +361,7 @@ export class SoftAP {
     };
   }
 
-  configure(opts, cb) {
+  configure(opts:any, cb:Function) {
     is(cb);
 
     var securePass = undefined;
@@ -443,16 +450,16 @@ export class SoftAP {
     this.__sendCommand({ name: 'configure-ap', body: apConfig }, cb);
   }
 
-  version(cb) {
+  version(cb:Function) {
     is(cb);
     this.__sendCommand({ name: 'version' }, cb);
   }
 
-  securityValue(name) {
+  securityValue(name:string) {
     return securityTable[name.toLowerCase()];
   }
 
-  securityLookup(dec) {
+  securityLookup(dec:string) {
     var match = null;
     Object.keys(securityTable).forEach(function securityType(key) {
       if (parseInt(dec) === securityTable[key]) {
@@ -462,7 +469,7 @@ export class SoftAP {
     return match;
   }
 
-  eapTypeValue(name) {
+  eapTypeValue(name:string) {
     return eapTypeTable[name.toLowerCase()];
   }
 }
